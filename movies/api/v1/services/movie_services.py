@@ -69,5 +69,6 @@ async def language_search_movies(language, sort, direction, offset, count, searc
 
 
 async def get_movie_detail(id):
+    mv = await Movies.get(id)
 
     return await Movies.get(id)

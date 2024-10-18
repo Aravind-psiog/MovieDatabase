@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query, HTTPException
 from pydantic import conint
 from pyparsing import empty
 from typing import Any, Union
+from fastapi.encoders import jsonable_encoder
 from core_services.v1.database.documents import Movies, User
 
 from core_services.v1.database.database import series_motor_client, movies_motor_client
@@ -23,13 +24,11 @@ router = APIRouter()
 class CustomObjectIdField:
     @classmethod
     def __get_validators__(cls):
-        print("ssssssssssssssssssssssssssssssss")
         yield cls.validate
 
     @classmethod
     def validate(cls, value: Any) -> str:
         if isinstance(value, ObjectId):
-            print(str(value))
             return str(value)
         return value
 
@@ -84,14 +83,13 @@ async def list_movies(
 async def get_a_movie(
     _id: str
 ):
-    print(_id)
     try:
         PydanticObjectId(_id)
     except:
         raise HTTPException(status_code=422, detail=f"Invalid item id {_id}")
     movie = await get_movie_detail(_id)
     if movie:
-        return MovieResponse(result=movie.dict())
+        return MovieResponse(result=jsonable_encoder(movie))
     raise HTTPException(status_code=404, detail=f"Movie {_id} not found")
 
 
@@ -121,8 +119,6 @@ async def get_favourites(ref_id: str):
     # movies = mydb["movies"]
     mv = await movies_motor_client()
     users = mydb['users']
-    # print(users)
-    # print('..................')
     a = await series_motor_client()
     regex_pattern = "\\b" + "blue" + "\\b"
     pipeline = [

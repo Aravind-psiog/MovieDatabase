@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI, Request, APIRouter
 from core_services.v1.services import config_service, resource
 from starlette.middleware.cors import CORSMiddleware
 import movies.api.v1.routes.api as movies_route
+import series.api.v1.routes.api as series_route
 from mangum import Mangum
 
 lambdaPaths = resource.resources()
@@ -12,7 +13,7 @@ lambdaPaths = resource.resources()
 if lambdaPaths["staging"] is None:
     fastapi_doc = None
 else:
-    fastapi_doc = f'{lambdaPaths["staging"]}/{lambdaPaths["resource"]}'
+    fastapi_doc = f'{lambdaPaths["staging"]}'
 
 app = FastAPI(root_path=fastapi_doc)
 router = APIRouter()
@@ -78,4 +79,5 @@ async def default():
 
 app.include_router(router)
 app.include_router(movies_route.router)
+app.include_router(series_route.router)
 handler = Mangum(app, api_gateway_base_path=lambdaPaths["resource"])
